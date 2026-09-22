@@ -11,8 +11,16 @@
 #include <vector>
 #include <cstdint>
 
+/**
+ * Indicates the sampling function to use
+ */
 
-
+enum class SampleType
+{
+    LogScope,
+    DebugString,
+    DebugOneArg
+};
 
 /**
  * Runs logging performance benchmarks and collects their results.
@@ -27,6 +35,7 @@ private:
 
     int nSessions; // Number of benchmark sessions to run
     int nSamples; // Number of samples per benchmark session
+    SampleType sType; // Type of sample being collected
 
     std::vector<uint64_t> sessionResult; // Holds result of each sample in a single sessions
 
@@ -34,7 +43,7 @@ public:
 
     // Constructor
 
-    BenchmarkRunner(int nSessions, int nSamples);
+    BenchmarkRunner(int nSessions, int nSamples, SampleType sType);
 
     // Benchmarking Functions
 
@@ -42,7 +51,7 @@ public:
 
     void run_single_session();
 
-    uint64_t run_sample();
+    uint64_t run_sample(SampleType sType);
 
     void run_benchmark();
 

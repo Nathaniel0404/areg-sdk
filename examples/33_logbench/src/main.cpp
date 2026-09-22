@@ -9,7 +9,7 @@
 
 int main(int argc, char * argv[]) 
 {
-    BenchmarkRunner runner(5,1000);
+    BenchmarkRunner runner(5, 1000, SampleType::DebugString);
     runner.init_benchmark();
     runner.run_benchmark();
     return 0;

@@ -8,9 +8,10 @@ DEF_LOG_SCOPE(logging_bench, bench_log_scope);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_1_arg);
 
-BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples)
+BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples, SampleType sType)
     : nSessions(nSessions),
-      nSamples(nSamples)
+      nSamples(nSamples),
+      sType(sType)
 {
 }
 
@@ -29,13 +30,31 @@ void BenchmarkRunner::run_benchmark() {
 
 void BenchmarkRunner::run_single_session() {
     for (int i = 0; i < nSamples; i++) {
-        uint64_t sampleTime = run_sample();
+        uint64_t sampleTime = run_sample(sType);
         sessionResult.push_back(sampleTime);
     }
 }
 
-uint64_t BenchmarkRunner::run_sample() {
-    return bench_log_scope();
+uint64_t BenchmarkRunner::run_sample(SampleType sType) {
+    uint64_t sample;
+    switch (sType)
+    {
+    case SampleType::LogScope:
+        sample = bench_log_scope();
+        break;
+
+    case SampleType::DebugString:
+        sample = bench_dbg_string();
+        break;
+    
+    case SampleType::DebugOneArg:
+        sample = bench_dbg_1_arg();
+        break;
+    
+    default:
+        break;
+    }
+    return sample;
 }
 
 
