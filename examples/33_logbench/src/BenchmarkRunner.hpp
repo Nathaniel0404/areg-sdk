@@ -7,20 +7,11 @@
 #include "areg/base/Thread.hpp"
 
 #include "areg/logging/areg_log.h"
+#include "src/BenchmarkTypes.hpp"
 
 #include <vector>
 #include <cstdint>
 
-/**
- * Indicates the sampling function to use
- */
-
-enum class SampleType
-{
-    LogScope,
-    DebugString,
-    DebugOneArg
-};
 
 
 /**
