@@ -44,7 +44,7 @@ private:
 
     int nSessions; // Number of benchmark sessions to run
     int nSamples; // Number of samples per benchmark session
-    SampleType sType; // Type of sample being collected
+    SampleType sampleType; // Type of sample being collected
 
     std::vector<uint64_t> sessionResult; // Holds result of each sample in a single sessions
 

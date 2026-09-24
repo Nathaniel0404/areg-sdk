@@ -8,10 +8,10 @@ DEF_LOG_SCOPE(logging_bench, bench_log_scope);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_1_arg);
 
-BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples, SampleType sType)
+BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples, SampleType sampleType)
     : nSessions(nSessions),
       nSamples(nSamples),
-      sType(sType)
+      sampleType(sampleType)
 {
 }
 
@@ -30,7 +30,7 @@ void BenchmarkRunner::run_benchmark() {
 
 void BenchmarkRunner::run_single_session() {
     for (int i = 0; i < nSamples; i++) {
-        uint64_t sampleTime = run_sample(sType);
+        uint64_t sampleTime = run_sample(sampleType);
         sessionResult.push_back(sampleTime);
     }
 }
