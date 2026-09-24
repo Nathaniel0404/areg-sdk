@@ -1,0 +1,31 @@
+#ifndef AREG_LOG_BENCHMARK_INPUT_PARSER
+#define AREG_LOG_BENCHMARK_INPUT_PARSER
+
+#include "src/BenchmarkTypes.hpp"
+
+#include <vector>
+
+struct ParsedArg
+{
+    std::string flag;
+    std::string value; 
+};
+
+
+/**
+ * Converts the input arguments into a config object for the benchmarker
+ */
+class InputParser 
+{
+
+public:
+
+    static BenchmarkConfig parseInput(std::vector<std::string> args);
+
+private:
+
+    static BenchmarkConfig buildConfig(std::vector<ParsedArg> pList);
+
+};
+
+#endif

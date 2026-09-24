@@ -11,5 +11,14 @@ enum class SampleType
     DebugOneArg
 };
 
+/**
+ * Contains the settings of the benchmark, used in the construction of the BenchmarkRunner object
+ */
+struct BenchmarkConfig 
+{
+    int nSessions=1;
+    int nSamples=1000;
+    SampleType sampleType=SampleType::LogScope;
+};
 
 #endif

@@ -1,10 +1,6 @@
 #ifndef AREG_LOG_BENCHMARK_RUNNER
 #define AREG_LOG_BENCHMARK_RUNNER
 
-#include "areg/base/areg_global.h"
-#include "areg/base/ThreadConsumer.hpp"
-#include "areg/base/String.hpp"
-#include "areg/base/Thread.hpp"
 
 #include "areg/logging/areg_log.h"
 #include "src/BenchmarkTypes.hpp"
