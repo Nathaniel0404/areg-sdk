@@ -58,7 +58,7 @@ public:
 
     void init_benchmark();
 
-    void run_single_session();
+    SessionResult run_single_session();
 
     uint64_t run_sample(SampleType sType);
 

@@ -21,18 +21,20 @@ void BenchmarkRunner::init_benchmark() {
 
 void BenchmarkRunner::run_benchmark() {
     for (int i = 0; i < nSessions; i++) {
-        run_single_session();
-        uint64_t aveTime = std::accumulate(sessionResult.begin(),sessionResult.end(),0) / nSamples;
+        SessionResult sessionResult = run_single_session();
+        uint64_t aveTime = std::accumulate(sessionResult.sampleLatency.begin(),sessionResult.sampleLatency.end(),0) / nSamples;
         std::cout << i+1 << " session: "<< aveTime << std::endl;
         init_benchmark();
     }
 }
 
-void BenchmarkRunner::run_single_session() {
+SessionResult BenchmarkRunner::run_single_session() {
+    SessionResult result;
     for (int i = 0; i < nSamples; i++) {
         uint64_t sampleTime = run_sample(sampleType);
-        sessionResult.push_back(sampleTime);
+        result.sampleLatency.push_back(sampleTime);
     }
+    return result;
 }
 
 uint64_t BenchmarkRunner::run_sample(SampleType sType) {
