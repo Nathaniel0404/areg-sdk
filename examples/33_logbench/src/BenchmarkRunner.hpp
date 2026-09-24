@@ -22,6 +22,16 @@ enum class SampleType
     DebugOneArg
 };
 
+
+/**
+ * Stores raw data from a benchmark session
+ */
+struct SessionResult
+{
+    std::vector<u_int64_t> sampleLatency; // Stores the latency recorded for each sample
+};
+
+
 /**
  * Runs logging performance benchmarks and collects their results.
  */
@@ -29,7 +39,6 @@ enum class SampleType
 class BenchmarkRunner
 
 {
-
 
 private:
 
