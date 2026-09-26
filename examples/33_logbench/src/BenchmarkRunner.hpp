@@ -10,13 +10,6 @@
 
 
 
-/**
- * Stores raw data from a benchmark session
- */
-struct SessionResult
-{
-    std::vector<u_int64_t> sampleLatency; // Stores the latency recorded for each sample
-};
 
 
 /**
@@ -35,6 +28,7 @@ private:
 
     std::vector<uint64_t> sessionResult; // Holds result of each sample in a single sessions
 
+
 public:
 
     // Constructor
@@ -47,14 +41,14 @@ public:
 
     void init_benchmark();
 
-    SessionResult run_single_session();
+    void run_single_session();
 
     uint64_t run_sample(SampleType sType);
 
     void run_benchmark();
 
     // Sample Functions
-
+private:
     uint64_t now_ns();
 
     uint64_t bench_log_scope();
