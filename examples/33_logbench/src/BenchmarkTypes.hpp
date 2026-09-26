@@ -19,9 +19,10 @@ enum class SampleType
  */
 struct BenchmarkConfig 
 {
-    int nSessions=1;
-    int nSamples=1000;
-    SampleType sampleType=SampleType::LogScope;
+    int nSessions = 1;
+    int nSamples = 1000;
+    int nWarmUps = 0;
+    SampleType sampleType = SampleType::LogScope;
 };
 
 

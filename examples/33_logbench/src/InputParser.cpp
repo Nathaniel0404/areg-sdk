@@ -34,7 +34,7 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
     BenchmarkConfig cfg;
     for (ParsedArg p : pList) {
         int argVal;
-        if (p.flag == "l" || p.flag == "sn" || p.flag == "msg") {
+        if (p.flag == "l" || p.flag == "sn" || p.flag == "msg" || p.flag == "w") {
             try {
                 argVal = stoi(p.value);
             } catch (const std::invalid_argument&) {
@@ -71,6 +71,12 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
                     throw std::invalid_argument("Invalid message type");
                     break;
             }
+        } else if (p.flag == "w") {
+            argVal = stoi(p.value);
+            if (argVal < 0 || argVal > 100) {
+                throw std::out_of_range("Number of warm-up sessions must be between 0 and 100!");
+            }
+            cfg.nWarmUps = argVal;
         } else {
             throw std::invalid_argument("Unknown flag found!");
         }
