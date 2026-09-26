@@ -15,6 +15,13 @@ BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples, SampleType sampleT
 {
 }
 
+BenchmarkRunner::BenchmarkRunner(BenchmarkConfig cfg)
+    : nSessions(cfg.nSessions),
+      nSamples(cfg.nSamples),
+      sampleType(cfg.sampleType)
+{
+}
+
 void BenchmarkRunner::init_benchmark() {
     sessionResult = {};
 }

@@ -40,6 +40,8 @@ public:
     // Constructor
 
     BenchmarkRunner(int nSessions, int nSamples, SampleType sType);
+    
+    BenchmarkRunner(BenchmarkConfig cfg);
 
     // Benchmarking Functions
 

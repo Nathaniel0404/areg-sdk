@@ -20,7 +20,7 @@ class InputParser
 
 public:
 
-    static BenchmarkConfig parseInput(std::vector<std::string> args);
+    static BenchmarkConfig parseInput(int argc, char* argv[]);
 
 private:
 
