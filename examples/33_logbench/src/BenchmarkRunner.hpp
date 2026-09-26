@@ -26,6 +26,8 @@ private:
 
     std::vector<uint64_t> samples; // Holds result of each sample in a single sessions
 
+    double clockSpeedNs; // Speed of calling now_ns()
+
 
 public:
 
@@ -45,8 +47,7 @@ public:
 
     // Sample Functions
 private:
-    uint64_t now_ns();
-
+    
     uint64_t bench_log_scope();
 
     uint64_t bench_dbg_string();

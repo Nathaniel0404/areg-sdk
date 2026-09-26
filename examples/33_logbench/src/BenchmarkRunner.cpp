@@ -18,6 +18,36 @@ DEF_LOG_SCOPE(logging_bench, bench_long_string);
 
 namespace {
 
+uint64_t now_ns() noexcept
+{
+    return static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()
+        ).count()
+        );
+}
+
+double measure_clock_cost(uint32_t samples) noexcept
+{
+    if (samples == 0u)
+        return 0.0;
+
+    // Warm the clock path up first, then time the loop as a whole: timing every single
+    // call would measure the timing itself.
+    volatile uint64_t sink{ 0u };
+    for (uint32_t i = 0u; i < 1000u; ++i)
+        sink = now_ns();
+
+    const uint64_t begin{ now_ns() };
+    for (uint32_t i = 0u; i < samples; ++i)
+        sink = now_ns();
+
+    const uint64_t end{ now_ns() };
+    static_cast<void>(sink);
+    return static_cast<double>(end - begin) / static_cast<double>(samples);
+}
+
+
 void visualise_header()
 {
     std::cout
@@ -53,6 +83,7 @@ void visualise_footer()
 BenchmarkRunner::BenchmarkRunner(BenchmarkConfig cfg)
     : cfg(cfg)
 {
+    clockSpeedNs = measure_clock_cost(1000u);
 }
 
 void BenchmarkRunner::init_benchmark() {
@@ -68,7 +99,7 @@ void BenchmarkRunner::run_benchmark() {
 
     for (int i = 0; i < cfg.nSessions; i++) {
         run_single_session();
-        SessionResult results = ResultProcessor::summarize(samples, cfg, i+1);
+        SessionResult results = ResultProcessor::summarize(samples, cfg, i+1, clockSpeedNs);
         visualise_results(results);
         init_benchmark();
     }
@@ -122,13 +153,6 @@ uint64_t BenchmarkRunner::run_sample(SampleType sType) {
 }
 
 
-uint64_t BenchmarkRunner::now_ns() {
-    return static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()
-        ).count()
-        );
-}
 
 uint64_t BenchmarkRunner::bench_log_scope() {
     uint64_t begin = now_ns();
@@ -143,7 +167,7 @@ uint64_t BenchmarkRunner::bench_dbg_string()
     uint64_t begin = now_ns();
     LOG_DBG("Hello World!");
     uint64_t end = now_ns();
-    return end - begin;
+    return (end - begin) / 1000;
 }
 
 uint64_t BenchmarkRunner::bench_dbg_1_arg() 
@@ -209,7 +233,7 @@ uint64_t BenchmarkRunner::bench_dbg_10_mixed()
         flags,
         latency
     );
-    
+
     uint64_t end = now_ns();
     return end - begin;
 }

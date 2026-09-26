@@ -47,6 +47,7 @@ struct SessionResult
     double _p99 = { 0.0 };
     double _p999 = { 0.0 };
     double _sd = { 0.0 };
+    double clockSpeedNs = { 0.0 };
 };
 
 
