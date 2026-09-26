@@ -34,6 +34,7 @@ struct SessionResult
     BenchmarkConfig cfg;
     double _min = { 0.0 };
     double _max = { 0.0 };
+    double _mean = { 0.0 };
     double _p50 = { 0.0 };
     double _p90 = { 0.0 };
     double _p99 = { 0.0 };
