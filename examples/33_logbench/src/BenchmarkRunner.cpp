@@ -8,40 +8,31 @@ DEF_LOG_SCOPE(logging_bench, bench_log_scope);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_1_arg);
 
-BenchmarkRunner::BenchmarkRunner(int nSessions, int nSamples, SampleType sampleType)
-    : nSessions(nSessions),
-      nSamples(nSamples),
-      sampleType(sampleType)
-{
-}
 
 BenchmarkRunner::BenchmarkRunner(BenchmarkConfig cfg)
-    : nSessions(cfg.nSessions),
-      nSamples(cfg.nSamples),
-      sampleType(cfg.sampleType)
+    : cfg(cfg)
 {
 }
 
 void BenchmarkRunner::init_benchmark() {
-    sessionResult = {};
+    samples = {};
 }
 
 void BenchmarkRunner::run_benchmark() {
-    for (int i = 0; i < nSessions; i++) {
-        SessionResult sessionResult = run_single_session();
-        uint64_t aveTime = std::accumulate(sessionResult.sampleLatency.begin(),sessionResult.sampleLatency.end(),0) / nSamples;
+    for (int i = 0; i < cfg.nSessions; i++) {
+        run_single_session();
+        uint64_t aveTime = std::accumulate(samples.begin(),samples.end(),0) / cfg.nSamples;
         std::cout << i+1 << " session: "<< aveTime << std::endl;
         init_benchmark();
     }
 }
 
-SessionResult BenchmarkRunner::run_single_session() {
-    SessionResult result;
-    for (int i = 0; i < nSamples; i++) {
-        uint64_t sampleTime = run_sample(sampleType);
-        result.sampleLatency.push_back(sampleTime);
+void BenchmarkRunner::run_single_session() {
+    for (int i = 0; i < cfg.nSamples; i++) {
+        uint64_t sampleTime = run_sample(cfg.sampleType);
+        samples.push_back(sampleTime);
     }
-    return result;
+    
 }
 
 uint64_t BenchmarkRunner::run_sample(SampleType sType) {

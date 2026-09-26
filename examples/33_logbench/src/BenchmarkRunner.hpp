@@ -22,18 +22,14 @@ class BenchmarkRunner
 
 private:
 
-    int nSessions; // Number of benchmark sessions to run
-    int nSamples; // Number of samples per benchmark session
-    SampleType sampleType; // Type of sample being collected
+    BenchmarkConfig cfg;
 
-    std::vector<uint64_t> sessionResult; // Holds result of each sample in a single sessions
+    std::vector<uint64_t> samples; // Holds result of each sample in a single sessions
 
 
 public:
 
     // Constructor
-
-    BenchmarkRunner(int nSessions, int nSamples, SampleType sType);
     
     BenchmarkRunner(BenchmarkConfig cfg);
 
