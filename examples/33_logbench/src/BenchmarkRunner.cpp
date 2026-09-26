@@ -10,6 +10,11 @@
 DEF_LOG_SCOPE(logging_bench, bench_log_scope);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_1_arg);
+DEF_LOG_SCOPE(logging_bench, bench_dbg_2_arg);
+DEF_LOG_SCOPE(logging_bench, bench_dbg_3_mixed);
+DEF_LOG_SCOPE(logging_bench, bench_dbg_10_mixed);
+DEF_LOG_SCOPE(logging_bench, bench_long_string);
+
 
 namespace {
 
@@ -94,6 +99,22 @@ uint64_t BenchmarkRunner::run_sample(SampleType sType) {
         sample = bench_dbg_1_arg();
         break;
     
+    case SampleType::DebugTwoArg:
+        sample = bench_dbg_2_arg();
+        break;
+    
+    case SampleType::DebugThreeMixedArg:
+        sample = bench_dbg_3_mixed();
+        break;
+    
+    case SampleType::DebugTenMixedArg:
+        sample = bench_dbg_10_mixed();
+        break;
+    
+    case SampleType::DebugLongString:
+        sample = bench_long_string();
+        break;
+    
     default:
         break;
     }
@@ -131,6 +152,78 @@ uint64_t BenchmarkRunner::bench_dbg_1_arg()
     int num1 = 11;
     uint64_t begin = now_ns();
     LOG_DBG("Value = %d",num1);
+    uint64_t end = now_ns();
+    return end - begin;
+}
+
+uint64_t BenchmarkRunner::bench_dbg_2_arg() 
+{
+    LOG_SCOPE(logging_bench, bench_dbg_2_arg);
+    int key = 1;
+    int val = 20;
+    uint64_t begin = now_ns();
+    LOG_DBG("Key = %d, Value = %d", key, val);
+    uint64_t end = now_ns();
+    return end - begin;
+}
+
+uint64_t BenchmarkRunner::bench_dbg_3_mixed() 
+{
+    LOG_SCOPE(logging_bench, bench_dbg_3_mixed);
+    std::string name = "AREG";
+    unsigned int key = 1;
+    double val = 0.5;
+    uint64_t begin = now_ns();
+    LOG_DBG("Name = %s, Key = %u, Value = %.2f", name.c_str(), key, val);
+    uint64_t end = now_ns();
+    return end - begin;
+}
+
+uint64_t BenchmarkRunner::bench_dbg_10_mixed() 
+{
+    LOG_SCOPE(logging_bench, bench_dbg_10_mixed);
+
+    std::string name = "worker";
+    int count = -42;
+    unsigned int key = 123;
+    double value = 3.14159;
+    const char* status = "active";
+    long long timestamp = 123456789LL;
+    unsigned long long bytes = 987654321ULL;
+    char grade = 'A';
+    unsigned int flags = 0xFF;
+    double latency = 22.4567;
+
+    uint64_t begin = now_ns();
+    LOG_DBG(
+        "Name=%s Count=%d Key=%u Value=%.2f Status=%s "
+        "Timestamp=%lld Bytes=%llu Grade=%c Flags=%x Latency=%.2f",
+        name.c_str(),
+        count,
+        key,
+        value,
+        status,
+        timestamp,
+        bytes,
+        grade,
+        flags,
+        latency
+    );
+    
+    uint64_t end = now_ns();
+    return end - begin;
+}
+
+uint64_t BenchmarkRunner::bench_long_string() 
+{
+    LOG_SCOPE(logging_bench, bench_long_string);
+    int STR_LEN = 300;
+    std::string str;
+    for (int i = 0; i < STR_LEN; i++) {
+        str.push_back('s');
+    }
+    uint64_t begin = now_ns();
+    LOG_DBG("%s", str.c_str());
     uint64_t end = now_ns();
     return end - begin;
 }

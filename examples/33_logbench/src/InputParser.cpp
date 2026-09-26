@@ -61,12 +61,31 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
                 case 1: 
                     cfg.sampleType = SampleType::LogScope;
                     break;
+                    
                 case 2:
                     cfg.sampleType = SampleType::DebugString;
                     break;
+
                 case 3:
                     cfg.sampleType = SampleType::DebugOneArg;
                     break;
+
+                case 4:
+                    cfg.sampleType = SampleType::DebugTwoArg;
+                    break;
+
+                case 5:
+                    cfg.sampleType = SampleType::DebugThreeMixedArg;
+                    break;
+
+                case 6:
+                    cfg.sampleType = SampleType::DebugTenMixedArg;
+                    break;
+
+                case 7:
+                    cfg.sampleType = SampleType::DebugLongString;
+                    break;
+
                 default:
                     throw std::invalid_argument("Invalid message type");
                     break;

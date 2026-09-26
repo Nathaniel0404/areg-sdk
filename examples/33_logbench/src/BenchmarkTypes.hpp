@@ -11,7 +11,12 @@ enum class SampleType
 {
     LogScope,
     DebugString,
-    DebugOneArg
+    DebugOneArg,
+    DebugTwoArg,
+    DebugThreeMixedArg,
+    DebugTenMixedArg,
+    DebugLongString,
+
 };
 
 /**

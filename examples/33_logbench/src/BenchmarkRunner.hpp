@@ -53,7 +53,13 @@ private:
 
     uint64_t bench_dbg_1_arg();
 
+    uint64_t bench_dbg_2_arg();
 
+    uint64_t bench_dbg_3_mixed();
+
+    uint64_t bench_dbg_10_mixed();
+
+    uint64_t bench_long_string();
 
 
 };
