@@ -15,7 +15,7 @@ namespace {
     }
 }
 
-SessionResult ResultProcessor::summarize(std::vector<uint64_t> samples, BenchmarkConfig cfg) {
+SessionResult ResultProcessor::summarize(std::vector<uint64_t> samples, BenchmarkConfig cfg, int sessionID) {
     sort(samples.begin(), samples.end()); 
     SessionResult result;
     result._max = samples.back();
@@ -26,6 +26,18 @@ SessionResult ResultProcessor::summarize(std::vector<uint64_t> samples, Benchmar
     result._p99 = _percentile(samples, 0.99);
     result._p999 = _percentile(samples, 0.999);
     result.cfg = cfg;
+    result.sessionID = sessionID;
+
+    double squaredDiffSum = 0.0;
+
+    for (uint64_t sample : samples)
+    {
+        double diff = static_cast<double>(sample) - result._mean;
+        squaredDiffSum += diff * diff;
+    }
+
+    result._sd = std::sqrt(squaredDiffSum / samples.size());
+    
     return result;
 }
 
