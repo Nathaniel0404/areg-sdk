@@ -51,15 +51,43 @@ double measure_clock_cost(uint32_t samples) noexcept
 void visualise_header()
 {
     std::cout
-        << "+-----+----------+----------+----------+----------+----------+----------+----------+----------+\n"
-        << "|  #  |  Min(us) |  Max(us) | Mean(us) |  P50(us) |  P90(us) |  P99(us)   P999(us) |   SD(us) |\n"
-        << "+-----+----------+----------+----------+----------+----------+----------+----------+----------+\n";
+        << "+------------+----------+----------+----------+----------+----------+----------+----------+----------+\n"
+        << "| Bench Type |  Min(us) |  Max(us) | Mean(us) |  P50(us) |  P90(us) |  P99(us)   P999(us) |   SD(us) |\n"
+        << "+------------+----------+----------+----------+----------+----------+----------+----------+----------+\n";
 }
 
 void visualise_results(const SessionResult& results)
 {
+    std::string benchType;
+
+    switch(results.sType) {
+        case SampleType::LogScope:
+            benchType = "LgScp";
+            break;
+        case SampleType::DebugOneArg:
+            benchType = "Dbg1a";
+            break;
+        case SampleType::DebugTwoArg:
+            benchType = "Dbg2a";
+            break;
+        case SampleType::DebugThreeMixedArg:
+            benchType = "Dbg3ma";
+            break;
+        case SampleType::DebugTenMixedArg:
+            benchType = "Dbg10ma";
+            break;
+        case SampleType::DebugLongString:
+            benchType = "DbgLngStr";
+            break;
+        case SampleType::DebugString:
+            benchType = "PureStr";
+            break;
+        default:
+            break;
+    }
+
     std::cout
-        << "| " << std::setw(3) << results.sessionID
+        << "| " << std::setw(10) << benchType
         << " | " << std::setw(8) << results._min
         << " | " << std::setw(8) << results._max
         << " | " << std::setw(8) << std::fixed << std::setprecision(2) << results._mean
@@ -74,12 +102,21 @@ void visualise_results(const SessionResult& results)
 void visualise_footer()
 {
     std::cout
-        << "+-----+----------+----------+----------+----------+----------+----------+----------+----------+\n";
+        << "+------------+----------+----------+----------+----------+----------+----------+----------+----------+\n";
 }
 
+constexpr SampleType sampleTypeVals[] = {
+    SampleType::LogScope,
+    SampleType::DebugString,
+    SampleType::DebugOneArg,
+    SampleType::DebugTwoArg,
+    SampleType::DebugThreeMixedArg,
+    SampleType::DebugLongString,
 
+};
 
 }
+
 BenchmarkRunner::BenchmarkRunner(BenchmarkConfig cfg)
     : cfg(cfg)
 {
@@ -91,24 +128,28 @@ void BenchmarkRunner::init_benchmark() {
 }
 
 void BenchmarkRunner::run_benchmark() {
+    std::cout << "Overhead latency test: " << std::endl;
     visualise_header();
     for (int i = 0; i < cfg.nWarmUps; i++) {
-        run_single_session();
+        run_single_session(SampleType::LogScope);
         init_benchmark();
     }
 
-    for (int i = 0; i < cfg.nSessions; i++) {
-        run_single_session();
-        SessionResult results = ResultProcessor::summarize(samples, cfg, i+1, clockSpeedNs);
+    for (SampleType sType : sampleTypeVals) {
+        run_single_session(sType);
+        SessionResult results = ResultProcessor::summarize(samples, cfg, sType, clockSpeedNs);
         visualise_results(results);
         init_benchmark();
+    }
+    for (int i = 0; i < cfg.nSessions; i++) {
+        
     }
     visualise_footer();
 }
 
-void BenchmarkRunner::run_single_session() {
+void BenchmarkRunner::run_single_session(SampleType sType) {
     for (int i = 0; i < cfg.nSamples; i++) {
-        uint64_t sampleTime = run_sample(cfg.sampleType);
+        uint64_t sampleTime = run_sample(sType);
         samples.push_back(sampleTime);
     }
     

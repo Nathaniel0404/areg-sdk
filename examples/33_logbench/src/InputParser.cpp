@@ -34,7 +34,7 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
     BenchmarkConfig cfg;
     for (ParsedArg p : pList) {
         int argVal;
-        std::set<std::string> numericalFlags = {"sn", "l", "msg", "w", "t", "a", "af", "ad", "as", "sl"};
+        std::set<std::string> numericalFlags = {"l", "msg", "w", "t", "a", "af", "ad", "as", "sl"};
         if (numericalFlags.find(p.flag) != numericalFlags.end()) {
             try {
                 argVal = stoi(p.value);
@@ -49,11 +49,6 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
                 throw std::out_of_range("Number of loops must be between 1000 and 100,000!");
             }
             cfg.nSamples = argVal;
-        } else if (p.flag == "sn") {
-            if (argVal < 1 || argVal > 20) {
-                throw std::out_of_range("Number of sessions must be between 1 and 20!");
-            }
-            cfg.nSessions = argVal;
         } else if (p.flag == "msg") {
             switch(argVal) {
                 case 1: 

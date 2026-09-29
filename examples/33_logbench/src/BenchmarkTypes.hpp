@@ -55,7 +55,7 @@ struct SessionResult
 {
     
     BenchmarkConfig cfg;
-    int sessionID = -1;
+    SampleType sType;
     double _min = { 0.0 };
     double _max = { 0.0 };
     double _mean = { 0.0 };
