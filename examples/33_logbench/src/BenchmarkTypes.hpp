@@ -19,15 +19,32 @@ enum class SampleType
 
 };
 
+enum class OutputDestination
+{
+    File,
+    Database,
+    Collector,
+    All
+};
+
 /**
  * Contains the settings of the benchmark, used in the construction of the BenchmarkRunner object
  */
 struct BenchmarkConfig 
 {
     int nSessions = 1;
-    int nSamples = 1000;
+    int nSamples = 10000;
+    int nThreads = 8;
     int nWarmUps = 0;
+    OutputDestination outDest = OutputDestination::All;
+
     SampleType sampleType = SampleType::LogScope;
+    int maxArgs = 8;
+    int nIntArgs = 4;
+    int nFloatArgs = 2;
+    int nStringArgs = 2;
+    int strArgLen = 16;
+    
 };
 
 
