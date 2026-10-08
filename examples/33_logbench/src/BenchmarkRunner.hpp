@@ -8,9 +8,8 @@
 #include <vector>
 #include <cstdint>
 
-
-
-
+// Max possible number of arguments for a log message
+constexpr int MAX_ARG = 12;
 
 /**
  * Runs logging performance benchmarks and collects their results.
@@ -45,8 +44,41 @@ public:
 
     void run_benchmark();
 
+    void run_dynamic_log_session();
+
+    void log_int();
+
     // Sample Functions
 private:
+
+    static uint64_t now_ns() noexcept
+    {
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()
+            ).count()
+            );
+    }
+
+    double measure_clock_cost(uint32_t samples) noexcept
+    {
+        if (samples == 0u)
+            return 0.0;
+
+        // Warm the clock path up first, then time the loop as a whole: timing every single
+        // call would measure the timing itself.
+        volatile uint64_t sink{ 0u };
+        for (uint32_t i = 0u; i < 1000u; ++i)
+            sink = now_ns();
+
+        const uint64_t begin{ now_ns() };
+        for (uint32_t i = 0u; i < samples; ++i)
+            sink = now_ns();
+
+        const uint64_t end{ now_ns() };
+        static_cast<void>(sink);
+        return static_cast<double>(end - begin) / static_cast<double>(samples);
+    }
     
     uint64_t bench_log_scope();
 
@@ -61,6 +93,91 @@ private:
     uint64_t bench_dbg_10_mixed();
 
     uint64_t bench_long_string();
+
+    uint64_t bench_dbg_dynamic();
+
+    // Templates for generating and benchmarking dynamic logging call
+    template <int NI, int NS, int NF>
+    std::string makeFormat() {
+        int count = 0;
+        std::string out = "";
+        for (int i = 0; i < NI; i++) {
+            count++;
+            out.append("Arg " + std::to_string(count) + ": %d, ");
+        }
+        for (int i = 0; i < NS; i++) {
+            count++;
+            out.append("Arg " + std::to_string(count) + ": %s, ");
+        }
+        for (int i = 0; i < NF; i++) {
+            count++;
+            out.append("Arg " + std::to_string(count) + ": %.2f, ");
+        }
+        return out.substr(0,out.size()-2);
+    };
+
+
+    template <int NI, int NS, int NF, typename LoggingCall>
+    void dispatchNF(int nFlt, LoggingCall&& logCall) {
+        if (nFlt == NF) {
+            std::string formatStr = makeFormat<NI,NS,NF>();
+            bench_dyn_log(std::make_index_sequence<3>{}, std::make_index_sequence<3>{}, std::make_index_sequence<3>{}, makeFormat<3,3,3>(), logCall);
+            
+            return;
+        }
+        if constexpr (NF < MAX_ARG) {
+            dispatchNF<NI,NS,NF+1>(nFlt,logCall);
+        }
+
+    }
+
+    template <int NI, int NS, typename LoggingCall>
+    void dispatchNS(int nStr, int nFlt, LoggingCall&& logCall) {
+        if (nStr == NS) {
+            dispatchNF<NI, NS, 0>(nFlt, logCall);
+            return;
+        }
+        if constexpr (NS < MAX_ARG) {
+            dispatchNS<NI,NS+1>(nStr, nFlt, logCall);
+        }
+        
+
+    }
+
+    template <int NI, typename LoggingCall>
+    void dispatchNI(int nInt, int nStr, int nFlt, LoggingCall&& logCall) {
+        if (nInt == NI) {
+            dispatchNS<NI,0>(nStr,nFlt,logCall);
+            return;
+        }
+
+        if constexpr (NI < MAX_ARG) {
+            dispatchNI<NI+1>(nInt, nStr, nFlt, logCall);
+        }
+    }
+
+
+    template <size_t... NI, size_t... NS, size_t... NF, typename LoggingCall>
+    void bench_dyn_log(
+        std::index_sequence<NI...>, 
+        std::index_sequence<NS...>, 
+        std::index_sequence<NF...>, 
+        const std::string& formatString, 
+        LoggingCall&& logCall
+    ) 
+    {
+        for (int i = 0; i < cfg.nSamples; i++) {
+            uint64_t begin = now_ns();
+            logCall(formatString.c_str(), ((void)NI, 42)..., ((void)NS, "Hello")..., ((void)NF, 3.14)...);
+            uint64_t end = now_ns();
+            uint64_t sample = end - begin;
+            samples.push_back(sample);
+        }
+        
+    }
+
+    
+
 
 
 };

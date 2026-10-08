@@ -34,7 +34,7 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
     BenchmarkConfig cfg;
     for (ParsedArg p : pList) {
         int argVal;
-        std::set<std::string> numericalFlags = {"l", "msg", "w", "t", "a", "af", "ad", "as", "sl"};
+        std::set<std::string> numericalFlags = {"l", "w", "t", "a", "af", "ad", "as", "sl"};
         if (numericalFlags.find(p.flag) != numericalFlags.end()) {
             try {
                 argVal = stoi(p.value);
@@ -49,40 +49,7 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
                 throw std::out_of_range("Number of loops must be between 1000 and 100,000!");
             }
             cfg.nSamples = argVal;
-        } else if (p.flag == "msg") {
-            switch(argVal) {
-                case 1: 
-                    cfg.sampleType = SampleType::LogScope;
-                    break;
-
-                case 2:
-                    cfg.sampleType = SampleType::DebugString;
-                    break;
-
-                case 3:
-                    cfg.sampleType = SampleType::DebugOneArg;
-                    break;
-
-                case 4:
-                    cfg.sampleType = SampleType::DebugTwoArg;
-                    break;
-
-                case 5:
-                    cfg.sampleType = SampleType::DebugThreeMixedArg;
-                    break;
-
-                case 6:
-                    cfg.sampleType = SampleType::DebugTenMixedArg;
-                    break;
-
-                case 7:
-                    cfg.sampleType = SampleType::DebugLongString;
-                    break;
-
-                default:
-                    throw std::invalid_argument("Invalid message type");
-                    break;
-            }
+        
         } else if (p.flag == "w") {
             if (argVal < 0 || argVal > 100) {
                 throw std::out_of_range(
@@ -143,13 +110,13 @@ BenchmarkConfig InputParser::buildConfig(std::vector<ParsedArg> pList) {
         } else if (p.flag == "s") {
 
             if (p.value == "collect") {
-                cfg.outDest = OutputDestination::Collector;
+                cfg.logDest = LogDestination::Collector;
             } else if (p.value == "file") {
-                cfg.outDest = OutputDestination::File;
+                cfg.logDest = LogDestination::File;
             } else if (p.value == "db") {
-                cfg.outDest = OutputDestination::Database;
+                cfg.logDest = LogDestination::Database;
             } else if (p.value == "all") {
-                cfg.outDest = OutputDestination::All;
+                cfg.logDest = LogDestination::All;
             } else {
                 throw std::invalid_argument("Unknown output destination!");
             }

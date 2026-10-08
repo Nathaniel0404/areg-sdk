@@ -16,10 +16,11 @@ enum class SampleType
     DebugThreeMixedArg,
     DebugTenMixedArg,
     DebugLongString,
+    DebugDynamicString,
 
 };
 
-enum class OutputDestination
+enum class LogDestination
 {
     File,
     Database,
@@ -32,13 +33,10 @@ enum class OutputDestination
  */
 struct BenchmarkConfig 
 {
-    int nSessions = 1;
     int nSamples = 10000;
     int nThreads = 8;
     int nWarmUps = 0;
-    OutputDestination outDest = OutputDestination::All;
-
-    SampleType sampleType = SampleType::LogScope;
+    LogDestination logDest = LogDestination::All;
     int maxArgs = 8;
     int nIntArgs = 4;
     int nFloatArgs = 2;

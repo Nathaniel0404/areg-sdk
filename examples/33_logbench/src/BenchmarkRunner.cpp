@@ -6,7 +6,7 @@
 #include <numeric>
 #include <iomanip>
 
-
+DEF_LOG_SCOPE(logging_bench, test_dynamic_log);
 DEF_LOG_SCOPE(logging_bench, bench_log_scope);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_1_arg);
@@ -17,72 +17,6 @@ DEF_LOG_SCOPE(logging_bench, bench_long_string);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_dynamic);
 
 namespace {
-
-uint64_t now_ns() noexcept
-{
-    return static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()
-        ).count()
-        );
-}
-
-double measure_clock_cost(uint32_t samples) noexcept
-{
-    if (samples == 0u)
-        return 0.0;
-
-    // Warm the clock path up first, then time the loop as a whole: timing every single
-    // call would measure the timing itself.
-    volatile uint64_t sink{ 0u };
-    for (uint32_t i = 0u; i < 1000u; ++i)
-        sink = now_ns();
-
-    const uint64_t begin{ now_ns() };
-    for (uint32_t i = 0u; i < samples; ++i)
-        sink = now_ns();
-
-    const uint64_t end{ now_ns() };
-    static_cast<void>(sink);
-    return static_cast<double>(end - begin) / static_cast<double>(samples);
-}
-
-std::string generateDynamicMsg(int nInt, int nFloat, int nStr, int strLen) {
-    std::string msg = "String message with ";
-    int argCount = 0;
-    int INT_ARG = 100;
-    double FLT_ARG = 100.55;
-    std::string STR_ARG = "";
-    for (int i = 0; i < strLen; i++) {
-        STR_ARG.push_back('a');
-    }
-    for (int i = 0; i < nInt; i++) {
-        argCount++;
-        if (argCount > 1) {
-            msg.append(" and ");
-        }
-        msg.append("arg %d = [%d]", argCount, INT_ARG);
-        msg += "arg " + std::to_string(argCount) + " = [" + std::to_string(INT_ARG) + "]";
-    }
-
-    for (int i = 0; i < nFloat; i++) {
-        argCount++;
-        if (argCount > 1) {
-            msg.append(" and ");
-        }
-        msg.append("arg %d = [%.2f]", argCount, FLT_ARG);
-        msg += "arg " + std::to_string(argCount) + " = [" + std::to_string(FLT_ARG) + "]";
-    }
-
-    for (int i = 0; i < nInt; i++) {
-        argCount++;
-        if (argCount > 1) {
-            msg.append(" and ");
-        }
-        msg += "arg " + std::to_string(argCount) + " = [" + STR_ARG + "]";
-    }
-    return msg;
-}
 
 void visualise_header()
 {
@@ -158,6 +92,10 @@ constexpr SampleType sampleTypeVals[] = {
 
 }
 
+
+
+
+
 BenchmarkRunner::BenchmarkRunner(BenchmarkConfig cfg)
     : cfg(cfg)
 {
@@ -177,12 +115,32 @@ void BenchmarkRunner::run_benchmark() {
     }
 
     for (SampleType sType : sampleTypeVals) {
-        run_single_session(sType);
+        if (sType == SampleType::DebugDynamicString) {
+            run_dynamic_log_session();
+        } else {
+            run_single_session(sType);
+            
+        }
         SessionResult results = ResultProcessor::summarize(samples, cfg, sType, clockSpeedNs);
         visualise_results(results);
         init_benchmark();
+        
     }
     visualise_footer();
+}
+
+void BenchmarkRunner::run_dynamic_log_session() {
+    LOGGING_CONFIGURE_AND_START(nullptr, true);
+    LOG_SCOPE(logging_bench, test_dynamic_log);
+    auto makeLogCall = [&](const char* format, auto&&... args)
+    {
+        LOG_DBG(format, args...);
+    };
+
+    // Starts runtime dispatch to find the right template function that matches number of specified arguments
+    dispatchNI<0>(cfg.nIntArgs,cfg.nStringArgs,cfg.nFloatArgs,makeLogCall);
+
+    LOGGING_STOP();
 }
 
 void BenchmarkRunner::run_single_session(SampleType sType) {
@@ -196,7 +154,7 @@ void BenchmarkRunner::run_single_session(SampleType sType) {
 }
 
 uint64_t BenchmarkRunner::run_sample(SampleType sType) {
-    uint64_t sample;
+    uint64_t sample = 0;
     switch (sType)
     {
     case SampleType::LogScope:
@@ -227,10 +185,6 @@ uint64_t BenchmarkRunner::run_sample(SampleType sType) {
         sample = bench_long_string();
         break;
 
-    case SampleType::DebugDynamicString:
-        sample = bench_dbg_dynamic();
-        break;
-    
     default:
         break;
     }
@@ -335,14 +289,4 @@ uint64_t BenchmarkRunner::bench_long_string()
     LOG_DBG(str.c_str());
     uint64_t end = now_ns();
     return end - begin;
-}
-
-uint64_t BenchmarkRunner::bench_dbg_dynamic() 
-{
-    LOG_SCOPE(logging_bench, bench_dbg_string);
-    std::string msg = generateDynamicMsg(cfg.nIntArgs, cfg.nFloatArgs, cfg.nStringArgs, cfg.strArgLen);
-    uint64_t begin = now_ns();
-    LOG_DBG(msg.c_str());
-    uint64_t end = now_ns();
-    return (end - begin) / 1000;
 }
