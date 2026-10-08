@@ -35,7 +35,7 @@ SessionResult ResultProcessor::summarize(std::vector<uint64_t> samples, Benchmar
 
     for (uint64_t sample : samples)
     {
-        double diff = static_cast<double>(sample) - result._mean;
+        double diff = static_cast<double>(sample / NS_PER_US) - result._mean;
         squaredDiffSum += diff * diff;
     }
 
