@@ -150,6 +150,7 @@ constexpr SampleType sampleTypeVals[] = {
     SampleType::DebugOneArg,
     SampleType::DebugTwoArg,
     SampleType::DebugThreeMixedArg,
+    SampleType::DebugTenMixedArg,
     SampleType::DebugLongString,
     SampleType::DebugDynamicString,
 
