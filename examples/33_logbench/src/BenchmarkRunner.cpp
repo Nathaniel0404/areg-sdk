@@ -14,7 +14,7 @@ DEF_LOG_SCOPE(logging_bench, bench_dbg_2_arg);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_3_mixed);
 DEF_LOG_SCOPE(logging_bench, bench_dbg_10_mixed);
 DEF_LOG_SCOPE(logging_bench, bench_long_string);
-
+DEF_LOG_SCOPE(logging_bench, bench_dbg_dynamic);
 
 namespace {
 
@@ -47,6 +47,42 @@ double measure_clock_cost(uint32_t samples) noexcept
     return static_cast<double>(end - begin) / static_cast<double>(samples);
 }
 
+std::string generateDynamicMsg(int nInt, int nFloat, int nStr, int strLen) {
+    std::string msg = "String message with ";
+    int argCount = 0;
+    int INT_ARG = 100;
+    double FLT_ARG = 100.55;
+    std::string STR_ARG = "";
+    for (int i = 0; i < strLen; i++) {
+        STR_ARG.push_back('a');
+    }
+    for (int i = 0; i < nInt; i++) {
+        argCount++;
+        if (argCount > 1) {
+            msg.append(" and ");
+        }
+        msg.append("arg %d = [%d]", argCount, INT_ARG);
+        msg += "arg " + std::to_string(argCount) + " = [" + std::to_string(INT_ARG) + "]";
+    }
+
+    for (int i = 0; i < nFloat; i++) {
+        argCount++;
+        if (argCount > 1) {
+            msg.append(" and ");
+        }
+        msg.append("arg %d = [%.2f]", argCount, FLT_ARG);
+        msg += "arg " + std::to_string(argCount) + " = [" + std::to_string(FLT_ARG) + "]";
+    }
+
+    for (int i = 0; i < nInt; i++) {
+        argCount++;
+        if (argCount > 1) {
+            msg.append(" and ");
+        }
+        msg += "arg " + std::to_string(argCount) + " = [" + STR_ARG + "]";
+    }
+    return msg;
+}
 
 void visualise_header()
 {
@@ -82,6 +118,9 @@ void visualise_results(const SessionResult& results)
         case SampleType::DebugString:
             benchType = "PureStr";
             break;
+        case SampleType::DebugDynamicString:
+            benchType = "DynStr";
+            break;
         default:
             break;
     }
@@ -112,6 +151,7 @@ constexpr SampleType sampleTypeVals[] = {
     SampleType::DebugTwoArg,
     SampleType::DebugThreeMixedArg,
     SampleType::DebugLongString,
+    SampleType::DebugDynamicString,
 
 };
 
@@ -141,17 +181,16 @@ void BenchmarkRunner::run_benchmark() {
         visualise_results(results);
         init_benchmark();
     }
-    for (int i = 0; i < cfg.nSessions; i++) {
-        
-    }
     visualise_footer();
 }
 
 void BenchmarkRunner::run_single_session(SampleType sType) {
+    LOGGING_CONFIGURE_AND_START(nullptr, true);
     for (int i = 0; i < cfg.nSamples; i++) {
         uint64_t sampleTime = run_sample(sType);
         samples.push_back(sampleTime);
     }
+    LOGGING_STOP();
     
 }
 
@@ -185,6 +224,10 @@ uint64_t BenchmarkRunner::run_sample(SampleType sType) {
     
     case SampleType::DebugLongString:
         sample = bench_long_string();
+        break;
+
+    case SampleType::DebugDynamicString:
+        sample = bench_dbg_dynamic();
         break;
     
     default:
@@ -288,7 +331,17 @@ uint64_t BenchmarkRunner::bench_long_string()
         str.push_back('s');
     }
     uint64_t begin = now_ns();
-    LOG_DBG("%s", str.c_str());
+    LOG_DBG(str.c_str());
     uint64_t end = now_ns();
     return end - begin;
+}
+
+uint64_t BenchmarkRunner::bench_dbg_dynamic() 
+{
+    LOG_SCOPE(logging_bench, bench_dbg_string);
+    std::string msg = generateDynamicMsg(cfg.nIntArgs, cfg.nFloatArgs, cfg.nStringArgs, cfg.strArgLen);
+    uint64_t begin = now_ns();
+    LOG_DBG(msg.c_str());
+    uint64_t end = now_ns();
+    return (end - begin) / 1000;
 }
